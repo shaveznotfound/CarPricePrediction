@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carzly | Car Price Predictor</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- AOS Animation -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+</head>
+
+<body class="font-[Poppins] bg-gray-50 text-gray-800">
+
+  <!-- Navbar -->
+  <nav class="fixed w-full bg-white shadow-md z-50">
+    <div class="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
+      <h1 class="text-2xl font-bold text-amber-500">Carzly</h1>
+      <ul class="hidden md:flex space-x-8 text-gray-700 font-semibold">
+        <li><a href="#" class="hover:text-amber-500 transition">Home</a></li>
+        <li><a href="#brands" class="hover:text-amber-500 transition">Brands</a></li>
+        <li><a href="#predict" class="hover:text-amber-500 transition">Predict</a></li>
+        <li><a href="#contact" class="hover:text-amber-500 transition">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="relative h-screen flex items-center justify-center bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1600703402784-056db2cfad44?auto=format&fit=crop&w=1600&q=60');">
+    <div class="absolute inset-0 bg-black/60"></div>
+    <div class="relative z-10 text-center text-white px-4">
+      <h1 class="text-5xl md:text-6xl font-extrabold mb-4">Find the True Worth of Your Car</h1>
+      <p class="text-lg md:text-xl mb-6 text-gray-200">Data-Driven Car Price Prediction System | Just Like CarDekho 🚗</p>
+      <a href="#predict" class="bg-amber-500 hover:bg-amber-600 text-black font-semibold px-8 py-3 rounded-full transition">Check Your Car Value</a>
+    </div>
+  </section>
+
+  <!-- Popular Brands -->
+  <section id="brands" class="py-16 bg-white">
+    <div class="max-w-6xl mx-auto px-6 text-center">
+      <h2 class="text-4xl font-bold mb-8 text-gray-800">Popular Car Brands</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6 items-center">
+        <img src="{{ url_for('static', filename='images/maruti.jpg') }}" alt="Maruti" class="h-40 mx-auto grayscale hover:grayscale-0 transition">
+        <img src="{{ url_for('static', filename='images/hyundai.png') }}" alt="Hyundai" class="h-30 mx-auto grayscale hover:grayscale-0 transition">
+        <img src="{{ url_for('static', filename='images/tata.jpg') }}" alt="Tata" class="h-30 mx-auto grayscale hover:grayscale-0 transition">
+        <img src="{{ url_for('static', filename='images/honda.webp') }}" alt="Honda" class="h-20 mx-auto grayscale hover:grayscale-0 transition">
+        <img src="{{ url_for('static', filename='images/Toyota.png') }}" alt="Toyota" class="h-22 mx-auto grayscale hover:grayscale-0 transition">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/3/3e/Ford_logo_flat.svg" alt="Ford" class="h-14 mx-auto grayscale hover:grayscale-0 transition">
+      </div>
+    </div>
+  </section>
+
+  <!-- Car Categories -->
+  <section class="py-20 bg-gray-100">
+    <div class="max-w-6xl mx-auto px-6 text-center">
+      <h2 class="text-4xl font-bold mb-10">Explore Categories</h2>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition overflow-hidden" data-aos="zoom-in">
+          <img src="{{ url_for('static', filename='images/Suv.webp') }}" alt="SUV" class="w-full h-56 object-cover">
+          <h3 class="text-xl font-semibold py-4">SUV</h3>
+        </div>
+        <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition overflow-hidden" data-aos="zoom-in">
+          <img src="{{ url_for('static', filename='images/Sedan.jpg') }}" alt="Sedan" class="w-full h-56 object-cover">
+          <h3 class="text-xl font-semibold py-4">Sedan</h3>
+        </div>
+        <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition overflow-hidden" data-aos="zoom-in">
+          <img src="{{ url_for('static', filename='images/hatchback.jpg') }}" alt="Hatchback" class="w-full h-56 object-cover">
+          <h3 class="text-xl font-semibold py-4">Hatchback</h3>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Prediction Form -->
+  <section id="predict" class="py-24 bg-white">
+    <div class="max-w-4xl mx-auto bg-gray-50 p-10 rounded-2xl shadow-2xl border border-gray-200" data-aos="fade-up">
+      <h2 class="text-3xl font-bold text-center mb-10 text-gray-800">Predict Your Car Price</h2>
+
+      <!-- POST directly to /predict; JS will intercept and send via fetch -->
+      <form id="carForm" class="grid md:grid-cols-2 gap-6" method="post" action="/predict" accept-charset="UTF-8">
+        <div>
+          <label class="block mb-2 font-semibold">Brand</label>
+          <select id="company" name="company" class="w-full p-3 border rounded-md focus:ring-2 focus:ring-amber-400" required onchange="load_car_models()">
+            <option selected disabled value="">Select brand</option>
+            {% for company in companies %}
+            <option value="{{ company }}">{{ company }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label class="block mb-2 font-semibold">Model</label>
+          <!-- name matches backend: car_models -->
+          <select id="car_model" name="car_models" class="w-full p-3 border rounded-md focus:ring-2 focus:ring-amber-400" required>
+            <option selected disabled value="">Select model</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block mb-2 font-semibold">Year</label>
+          <select id="year" name="year" class="w-full p-3 border rounded-md focus:ring-2 focus:ring-amber-400" required>
+            <option selected disabled value="">Select year</option>
+            {% for year in years %}
+            <option value="{{ year }}">{{ year }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label class="block mb-2 font-semibold">Fuel Type</label>
+          <select id="fuel_type" name="fuel_type" class="w-full p-3 border rounded-md" required>
+            <option selected disabled value="">Select fuel</option>
+            {% for fuel_type in fuel_types %}
+            <option value="{{ fuel_type }}">{{ fuel_type }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-span-2">
+          <label class="block mb-2 font-semibold">Enter the Number of Kilometres that the car has travelled</label>
+          <input type="text" class="w-full p-3 border rounded-md" id="kilo_driven" name="kilo_driven" placeholder="Enter the kilometres driven" required>
+        </div>
+
+        <div class="col-span-2 text-center mt-6">
+          <button id="predictBtn" type="submit" class="bg-amber-500 hover:bg-amber-600 text-black font-bold py-3 px-10 rounded-full transition">Predict Price</button>
+        </div>
+      </form>
+
+      <div class="row mt-6">
+        <div class="col-12" style="text-align: center">
+          <h4><span id="prediction"></span></h4>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="bg-gray-900 text-white py-12">
+    <div class="max-w-6xl mx-auto text-center">
+      <h3 class="text-3xl font-bold mb-4">Get In Touch</h3>
+      <p class="text-gray-300 mb-6">Have queries or feedback? Let’s connect!</p>
+      <p class="text-lg">📧 carzlysupport@gmail.com</p>
+      <p class="mt-2">© 2025 Carzly | Built by <span class="text-amber-400 font-semibold">Shahvez Saifi</span></p>
+    </div>
+  </section>
+
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+  <!-- Models data injected as JSON -->
+  <script type="application/json" id="models-data">
+  {{ models_by_company | tojson | safe }}
+  </script>
+
+  <script>
+  AOS.init();
+
+  const modelsByCompany = JSON.parse(document.getElementById('models-data').textContent || '{}');
+
+  function load_car_models() {
+    const company = document.getElementById('company').value;
+    const carModelSelect = document.getElementById('car_model');
+
+    // Reset model select
+    carModelSelect.innerHTML = '<option selected disabled value="">Select model</option>';
+
+    if (!company) return;
+
+    const models = modelsByCompany[company] || [];
+
+    models.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m;
+      opt.textContent = m;
+      carModelSelect.appendChild(opt);
+    });
+  }
+
+  // Intercept form submission and call fetch POST (so the page won't refresh)
+  document.getElementById('carForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+
+    const predictionEl = document.getElementById('prediction');
+    predictionEl.textContent = 'Wait! Predicting Price...';
+
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        predictionEl.textContent = 'Error: ' + (data.error || 'Something went wrong');
+        return;
+      }
+
+      predictionEl.textContent = 'Prediction: ₹' + data.prediction;
+    } catch (err) {
+      predictionEl.textContent = 'Network error: ' + err.message;
+    }
+  });
+  </script>
+
+  <!-- jQuery / Bootstrap not required for form, but kept if you use elsewhere -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" crossorigin="anonymous"></script>
+</body>
+</html>

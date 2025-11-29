@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carzly | AI-Powered Car Price Predictor</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- AOS Animation -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Chart.js for future analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    * {
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .gradient-text {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .hover-lift {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .hover-lift:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+    
+    .loading-spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .pulse-animation {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+    
+    .form-input {
+      transition: all 0.3s ease;
+      border: 2px solid #e5e7eb;
+    }
+    
+    .form-input:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    .card-hover {
+      transition: all 0.3s ease;
+    }
+    
+    .card-hover:hover {
+      transform: scale(1.05);
+    }
+    
+    .nav-link {
+      position: relative;
+      transition: color 0.3s ease;
+    }
+    
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: -5px;
+      left: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      transition: width 0.3s ease;
+    }
+    
+    .nav-link:hover::after {
+      width: 100%;
+    }
+    
+    .prediction-result {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 15px;
+      font-size: 1.25rem;
+      font-weight: 600;
+      text-align: center;
+      animation: slideIn 0.5s ease;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .stats-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+    }
+    
+    .feature-icon {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      color: white;
+      font-size: 24px;
+    }
+    
+    .testimonial-card {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+    
+    .testimonial-card::before {
+      content: '"';
+      position: absolute;
+      top: -10px;
+      left: 20px;
+      font-size: 60px;
+      color: #667eea;
+      opacity: 0.3;
+    }
+    
+    .footer-link {
+      transition: color 0.3s ease;
+    }
+    
+    .footer-link:hover {
+      color: #667eea;
+    }
+    
+    .mobile-menu {
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+    }
+    
+    .mobile-menu.active {
+      transform: translateX(0);
+    }
+    
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 40;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- Navbar -->
+  <nav class="fixed w-full bg-white/95 backdrop-blur-md shadow-lg z-50 transition-all duration-300" id="navbar">
+    <div class="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
+      <div class="flex items-center space-x-2">
+        <div class="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
+          <i class="fas fa-car text-white text-xl"></i>
+        </div>
+        <h1 class="text-2xl font-bold gradient-text">Carzly</h1>
+      </div>
+      
+      <!-- Desktop Menu -->
+      <ul class="hidden md:flex space-x-8 text-gray-700 font-medium">
+        <li><a href="#home" class="nav-link hover:text-purple-600 transition">Home</a></li>
+        <li><a href="#features" class="nav-link hover:text-purple-600 transition">Features</a></li>
+        <li><a href="#brands" class="nav-link hover:text-purple-600 transition">Brands</a></li>
+        <li><a href="#predict" class="nav-link hover:text-purple-600 transition">Predict</a></li>
+        <li><a href="#testimonials" class="nav-link hover:text-purple-600 transition">Reviews</a></li>
+        <li><a href="#contact" class="nav-link hover:text-purple-600 transition">Contact</a></li>
+      </ul>
+      
+      <!-- Mobile Menu Button -->
+      <button class="md:hidden text-gray-700" id="mobile-menu-btn">
+        <i class="fas fa-bars text-2xl"></i>
+      </button>
+    </div>
+    
+    <!-- Mobile Menu -->
+    <div class="mobile-menu fixed top-0 right-0 h-full w-64 bg-white shadow-xl z-50 md:hidden" id="mobile-menu">
+      <div class="p-6">
+        <button class="absolute top-4 right-4 text-gray-700" id="close-mobile-menu">
+          <i class="fas fa-times text-2xl"></i>
+        </button>
+        <ul class="mt-12 space-y-6">
+          <li><a href="#home" class="block text-gray-700 hover:text-purple-600 transition font-medium">Home</a></li>
+          <li><a href="#features" class="block text-gray-700 hover:text-purple-600 transition font-medium">Features</a></li>
+          <li><a href="#brands" class="block text-gray-700 hover:text-purple-600 transition font-medium">Brands</a></li>
+          <li><a href="#predict" class="block text-gray-700 hover:text-purple-600 transition font-medium">Predict</a></li>
+          <li><a href="#testimonials" class="block text-gray-700 hover:text-purple-600 transition font-medium">Reviews</a></li>
+          <li><a href="#contact" class="block text-gray-700 hover:text-purple-600 transition font-medium">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="overlay" id="overlay"></div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section id="home" class="relative h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 overflow-hidden">
+    <!-- Background Animation -->
+    <div class="absolute inset-0">
+      <div class="absolute inset-0 bg-black/50"></div>
+      <div class="absolute inset-0">
+        <div class="floating-car absolute top-20 left-10 text-white/10 text-8xl animate-bounce">
+          <i class="fas fa-car"></i>
+        </div>
+        <div class="floating-car absolute bottom-20 right-10 text-white/10 text-6xl animate-pulse">
+          <i class="fas fa-car-side"></i>
+        </div>
+        <div class="floating-car absolute top-1/2 left-1/4 text-white/10 text-7xl animate-ping">
+          <i class="fas fa-truck"></i>
+        </div>
+      </div>
+    </div>
+    
+    <div class="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
+      <h1 class="text-5xl md:text-7xl font-extrabold mb-6 leading-tight" data-aos="fade-up">
+        Find the <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">True Worth</span> of Your Car
+      </h1>
+      <p class="text-xl md:text-2xl mb-8 text-gray-200 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="100">
+        AI-Powered Car Price Prediction System | Trusted by 50,000+ Users 🚗
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center" data-aos="fade-up" data-aos-delay="200">
+        <a href="#predict" class="btn-primary text-white font-semibold px-8 py-4 rounded-full text-lg transition inline-flex items-center space-x-2">
+          <span>Get Instant Valuation</span>
+          <i class="fas fa-arrow-right"></i>
+        </a>
+        <a href="#features" class="glass-effect text-white font-semibold px-8 py-4 rounded-full text-lg transition inline-flex items-center space-x-2 hover:bg-white/20">
+          <span>How It Works</span>
+          <i class="fas fa-play"></i>
+        </a>
+      </div>
+      
+      <!-- Stats -->
+      <div class="grid grid-cols-3 gap-8 mt-16 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="300">
+        <div class="text-center">
+          <div class="text-3xl font-bold text-yellow-400">50K+</div>
+          <div class="text-sm text-gray-300">Cars Valued</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-yellow-400">95%</div>
+          <div class="text-sm text-gray-300">Accuracy</div>
+        </div>
+        <div class="text-center">
+          <div class="text-3xl font-bold text-yellow-400">4.9/5</div>
+          <div class="text-sm text-gray-300">User Rating</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Scroll Indicator -->
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white animate-bounce">
+      <i class="fas fa-chevron-down text-2xl"></i>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="py-20 bg-white">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-16" data-aos="fade-up">
+        <h2 class="text-4xl md:text-5xl font-bold mb-4 gradient-text">Why Choose Carzly?</h2>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">Experience the most accurate and user-friendly car valuation platform</p>
+      </div>
+      
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="text-center p-8 rounded-2xl hover-lift bg-gradient-to-br from-purple-50 to-blue-50" data-aos="fade-up" data-aos-delay="100">
+          <div class="feature-icon">
+            <i class="fas fa-brain"></i>
+          </div>
+          <h3 class="text-xl font-semibold mb-4">AI-Powered Accuracy</h3>
+          <p class="text-gray-600">Advanced machine learning algorithms ensure 95%+ prediction accuracy</p>
+        </div>
+        
+        <div class="text-center p-8 rounded-2xl hover-lift bg-gradient-to-br from-green-50 to-teal-50" data-aos="fade-up" data-aos-delay="200">
+          <div class="feature-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+            <i class="fas fa-bolt"></i>
+          </div>
+          <h3 class="text-xl font-semibold mb-4">Instant Results</h3>
+          <p class="text-gray-600">Get your car's value in seconds, not minutes or hours</p>
+        </div>
+        
+        <div class="text-center p-8 rounded-2xl hover-lift bg-gradient-to-br from-orange-50 to-red-50" data-aos="fade-up" data-aos-delay="300">
+          <div class="feature-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #dc2626 100%);">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <h3 class="text-xl font-semibold mb-4">Trusted & Secure</h3>
+          <p class="text-gray-600">Your data is encrypted and never shared with third parties</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Popular Brands -->
+  <section id="brands" class="py-20 bg-gray-50">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-16" data-aos="fade-up">
+        <h2 class="text-4xl md:text-5xl font-bold mb-4 gradient-text">Popular Car Brands</h2>
+        <p class="text-xl text-gray-600">We support all major car manufacturers</p>
+      </div>
+      
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-8 items-center" data-aos="fade-up" data-aos-delay="200">
+        <div class="bg-white p-6 rounded-2xl shadow-lg hover-lift text-center card-hover">
+          <img src="{{ url_for('static', filename='images/maruti.jpg') }}" alt="Maruti" class="h-20 mx-auto mb-4">
+          <p class="font-semibold text-gray-700">Maruti Suzuki</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-lg hover-lift text-center card-hover">
+          <img src="{{ url_for('static', filename='images/hyundai.png') }}" alt="Hyundai" class="h-20 mx-auto mb-4">
+          <p class="font-semibold text-gray-700">Hyundai</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-lg hover-lift text-center card-hover">
+          <img src="{{ url_for('static', filename='images/tata.jpg') }}" alt="Tata" class="h-20 mx-auto mb-4">
+          <p class="font-semibold text-gray-700">Tata</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-lg hover-lift text-center card-hover">
+          <img src="{{ url_for('static', filename='images/honda.webp') }}" alt="Honda" class="h-20 mx-auto mb-4">
+          <p class="font-semibold text-gray-700">Honda</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-lg hover-lift text-center card-hover">
+          <img src="{{ url_for('static', filename='images/Toyota.png') }}" alt="Toyota" class="h-20 mx-auto mb-4">
+          <p class="font-semibold text-gray-700">Toyota</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-lg hover-lift text-center card-hover">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/3/3e/Ford_logo_flat.svg" alt="Ford" class="h-20 mx-auto mb-4">
+          <p class="font-semibold text-gray-700">Ford</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Car Categories -->
+  <section class="py-20 bg-white">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-16" data-aos="fade-up">
+        <h2 class="text-4xl md:text-5xl font-bold mb-4 gradient-text">Explore Categories</h2>
+        <p class="text-xl text-gray-600">Find cars by body type</p>
+      </div>
+      
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="group cursor-pointer" data-aos="zoom-in" data-aos-delay="100">
+          <div class="relative overflow-hidden rounded-2xl shadow-2xl hover-lift">
+            <img src="{{ url_for('static', filename='images/Suv.webp') }}" alt="SUV" class="w-full h-64 object-cover group-hover:scale-110 transition duration-500">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+            <div class="absolute bottom-6 left-6 text-white">
+              <h3 class="text-2xl font-bold">SUV</h3>
+              <p class="text-sm opacity-90">Sport Utility Vehicles</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="group cursor-pointer" data-aos="zoom-in" data-aos-delay="200">
+          <div class="relative overflow-hidden rounded-2xl shadow-2xl hover-lift">
+            <img src="{{ url_for('static', filename='images/Sedan.jpg') }}" alt="Sedan" class="w-full h-64 object-cover group-hover:scale-110 transition duration-500">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+            <div class="absolute bottom-6 left-6 text-white">
+              <h3 class="text-2xl font-bold">Sedan</h3>
+              <p class="text-sm opacity-90">Comfort & Luxury</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="group cursor-pointer" data-aos="zoom-in" data-aos-delay="300">
+          <div class="relative overflow-hidden rounded-2xl shadow-2xl hover-lift">
+            <img src="{{ url_for('static', filename='images/hatchback.jpg') }}" alt="Hatchback" class="w-full h-64 object-cover group-hover:scale-110 transition duration-500">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+            <div class="absolute bottom-6 left-6 text-white">
+              <h3 class="text-2xl font-bold">Hatchback</h3>
+              <p class="text-sm opacity-90">Compact & Efficient</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section id="testimonials" class="py-20 bg-gray-50">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-16" data-aos="fade-up">
+        <h2 class="text-4xl md:text-5xl font-bold mb-4 gradient-text">What Our Users Say</h2>
+        <p class="text-xl text-gray-600">Trusted by thousands of car owners</p>
+      </div>
+      
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="testimonial-card" data-aos="fade-up" data-aos-delay="100">
+          <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4">
+              <i class="fas fa-user text-purple-600"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold">Rajesh Kumar</h4>
+              <div class="flex text-yellow-400 text-sm">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+            </div>
+          </div>
+          <p class="text-gray-600">"Carzly helped me get the best price for my Swift. The prediction was spot on and saved me from being cheated by dealers!"</p>
+        </div>
+        
+        <div class="testimonial-card" data-aos="fade-up" data-aos-delay="200">
+          <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4">
+              <i class="fas fa-user text-purple-600"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold">Priya Sharma</h4>
+              <div class="flex text-yellow-400 text-sm">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+            </div>
+          </div>
+          <p class="text-gray-600">"Amazing accuracy! I got exactly what Carzly predicted for my i20. Highly recommend to anyone selling their car."</p>
+        </div>
+        
+        <div class="testimonial-card" data-aos="fade-up" data-aos-delay="300">
+          <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4">
+              <i class="fas fa-user text-purple-600"></i>
+            </div>
+            <div>
+              <h4 class="font-semibold">Amit Patel</h4>
+              <div class="flex text-yellow-400 text-sm">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+            </div>
+          </div>
+          <p class="text-gray-600">"The easiest way to check car prices. Better than any other platform I've used. 5 stars from me!"</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Prediction Form -->
+  <section id="predict" class="py-24 bg-gradient-to-br from-purple-50 to-blue-50">
+    <div class="max-w-4xl mx-auto px-6">
+      <div class="bg-white p-10 rounded-3xl shadow-2xl border border-gray-100" data-aos="fade-up">
+        <div class="text-center mb-10">
+          <h2 class="text-4xl font-bold mb-4 gradient-text">Get Your Car Valuation</h2>
+          <p class="text-xl text-gray-600">Fill in your car details and get instant price prediction</p>
+        </div>
+
+        <form id="carForm" class="grid md:grid-cols-2 gap-6" method="post" action="/predict" accept-charset="UTF-8">
+          <div>
+            <label class="block mb-3 font-semibold text-gray-700">Brand <span class="text-red-500">*</span></label>
+            <select id="company" name="company" class="w-full p-4 border-2 rounded-xl form-input focus:outline-none" required onchange="load_car_models()">
+              <option selected disabled value="">Select brand</option>
+              {% for company in companies %}
+              <option value="{{ company }}">{{ company }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label class="block mb-3 font-semibold text-gray-700">Model <span class="text-red-500">*</span></label>
+            <select id="car_model" name="car_models" class="w-full p-4 border-2 rounded-xl form-input focus:outline-none" required>
+              <option selected disabled value="">Select model</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block mb-3 font-semibold text-gray-700">Year <span class="text-red-500">*</span></label>
+            <select id="year" name="year" class="w-full p-4 border-2 rounded-xl form-input focus:outline-none" required>
+              <option selected disabled value="">Select year</option>
+              {% for year in years %}
+              <option value="{{ year }}">{{ year }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label class="block mb-3 font-semibold text-gray-700">Fuel Type <span class="text-red-500">*</span></label>
+            <select id="fuel_type" name="fuel_type" class="w-full p-4 border-2 rounded-xl form-input focus:outline-none" required>
+              <option selected disabled value="">Select fuel</option>
+              {% for fuel_type in fuel_types %}
+              <option value="{{ fuel_type }}">{{ fuel_type }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block mb-3 font-semibold text-gray-700">Kilometers Driven <span class="text-red-500">*</span></label>
+            <div class="relative">
+              <input type="number" class="w-full p-4 border-2 rounded-xl form-input focus:outline-none pr-12" id="kilo_driven" name="kilo_driven" placeholder="Enter kilometers driven" required min="0" max="9999999">
+              <span class="absolute right-4 top-4 text-gray-400">km</span>
+            </div>
+          </div>
+
+          <div class="md:col-span-2 text-center mt-8">
+            <button id="predictBtn" type="submit" class="btn-primary text-white font-bold py-4 px-12 rounded-full text-lg transition inline-flex items-center space-x-3">
+              <span>Predict Price</span>
+              <i class="fas fa-calculator"></i>
+            </button>
+          </div>
+        </form>
+
+        <!-- Prediction Result -->
+        <div id="prediction-container" class="mt-8 hidden">
+          <div class="prediction-result">
+            <div class="flex items-center justify-center space-x-3">
+              <i class="fas fa-chart-line text-2xl"></i>
+              <span id="prediction-text"></span>
+            </div>
+          </div>
+          
+          <!-- Additional Info -->
+          <div class="mt-6 grid md:grid-cols-3 gap-4">
+            <div class="stats-card">
+              <i class="fas fa-trending-up text-3xl mb-2"></i>
+              <div class="text-2xl font-bold">+15%</div>
+              <div class="text-sm opacity-90">Market Value</div>
+            </div>
+            <div class="stats-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+              <i class="fas fa-clock text-3xl mb-2"></i>
+              <div class="text-2xl font-bold">Instant</div>
+              <div class="text-sm opacity-90">Valuation</div>
+            </div>
+            <div class="stats-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+              <i class="fas fa-shield-alt text-3xl mb-2"></i>
+              <div class="text-2xl font-bold">100%</div>
+              <div class="text-sm opacity-90">Secure</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="hidden mt-8 text-center">
+          <div class="loading-spinner mx-auto mb-4"></div>
+          <p class="text-gray-600 pulse-animation">Analyzing market data and calculating your car's value...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-20 bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+    <div class="max-w-4xl mx-auto text-center px-6" data-aos="fade-up">
+      <h2 class="text-4xl md:text-5xl font-bold mb-6">Ready to Sell Your Car?</h2>
+      <p class="text-xl mb-8 opacity-90">Join thousands of satisfied users who got the best price for their cars</p>
+      <a href="#predict" class="bg-white text-purple-600 font-bold py-4 px-10 rounded-full text-lg transition hover:shadow-xl inline-flex items-center space-x-2">
+        <span>Get Started Now</span>
+        <i class="fas fa-rocket"></i>
+      </a>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="bg-gray-900 text-white py-16">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="grid md:grid-cols-3 gap-12">
+        <div>
+          <div class="flex items-center space-x-3 mb-6">
+            <div class="w-12 h-12 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
+              <i class="fas fa-car text-white text-xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold">Carzly</h3>
+          </div>
+          <p class="text-gray-400 mb-6">India's most trusted car price prediction platform. Get accurate valuations in seconds.</p>
+          <div class="flex space-x-4">
+            <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-purple-600 transition">
+              <i class="fab fa-facebook-f"></i>
+            </a>
+            <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-purple-600 transition">
+              <i class="fab fa-twitter"></i>
+            </a>
+            <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-purple-600 transition">
+              <i class="fab fa-instagram"></i>
+            </a>
+            <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-purple-600 transition">
+              <i class="fab fa-linkedin-in"></i>
+            </a>
+          </div>
+        </div>
+        
+        <div>
+          <h4 class="text-lg font-semibold mb-6">Quick Links</h4>
+          <ul class="space-y-3">
+            <li><a href="#home" class="footer-link text-gray-400 hover:text-white transition">Home</a></li>
+            <li><a href="#features" class="footer-link text-gray-400 hover:text-white transition">Features</a></li>
+            <li><a href="#brands" class="footer-link text-gray-400 hover:text-white transition">Brands</a></li>
+            <li><a href="#predict" class="footer-link text-gray-400 hover:text-white transition">Predict Price</a></li>
+            <li><a href="#testimonials" class="footer-link text-gray-400 hover:text-white transition">Reviews</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="text-lg font-semibold mb-6">Contact Info</h4>
+          <div class="space-y-4">
+            <div class="flex items-center space-x-3">
+              <i class="fas fa-envelope text-purple-400"></i>
+              <span class="text-gray-400">carzlysupport@gmail.com</span>
+            </div>
+            <div class="flex items-center space-x-3">
+              <i class="fas fa-phone text-purple-400"></i>
+              <span class="text-gray-400">+91 78388 87071</span>
+            </div>
+            <div class="flex items-center space-x-3">
+              <i class="fas fa-map-marker-alt text-purple-400"></i>
+              <span class="text-gray-400">New Delhi, India</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="border-t border-gray-800 mt-12 pt-8 text-center">
+        <p class="text-gray-400">© 2025 Carzly | Built with ❤️ by <span class="text-purple-400 font-semibold">Shahvez Saifi</span></p>
+      </div>
+    </div>
+  </section>
+
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+  <!-- Models data injected as JSON -->
+  <script type="application/json" id="models-data">
+  {{ models_by_company | tojson | safe }}
+  </script>
+
+  <script>
+  AOS.init({
+    duration: 1000,
+    once: true,
+    offset: 100
+  });
+
+  // Navbar scroll effect
+  window.addEventListener('scroll', function() {
+    const navbar = document.getElementById('navbar');
+    if (window.scrollY > 50) {
+      navbar.classList.add('shadow-lg');
+    } else {
+      navbar.classList.remove('shadow-lg');
+    }
+  });
+
+  // Mobile menu toggle
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const closeMobileMenu = document.getElementById('close-mobile-menu');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const overlay = document.getElementById('overlay');
+
+  mobileMenuBtn.addEventListener('click', function() {
+    mobileMenu.classList.add('active');
+    overlay.classList.add('active');
+  });
+
+  closeMobileMenu.addEventListener('click', function() {
+    mobileMenu.classList.remove('active');
+    overlay.classList.remove('active');
+  });
+
+  overlay.addEventListener('click', function() {
+    mobileMenu.classList.remove('active');
+    overlay.classList.remove('active');
+  });
+
+  // Smooth scrolling for navigation links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+      // Close mobile menu if open
+      mobileMenu.classList.remove('active');
+      overlay.classList.remove('active');
+    });
+  });
+
+  const modelsByCompany = JSON.parse(document.getElementById('models-data').textContent || '{}');
+
+  function load_car_models() {
+    const company = document.getElementById('company').value;
+    const carModelSelect = document.getElementById('car_model');
+
+    // Reset model select
+    carModelSelect.innerHTML = '<option selected disabled value="">Select model</option>';
+
+    if (!company) return;
+
+    const models = modelsByCompany[company] || [];
+
+    models.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m;
+      opt.textContent = m;
+      carModelSelect.appendChild(opt);
+    });
+  }
+
+  // Form submission with enhanced UX
+  document.getElementById('carForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    
+    // Hide previous results
+    document.getElementById('prediction-container').classList.add('hidden');
+    
+    // Show loading state
+    document.getElementById('loading-state').classList.remove('hidden');
+    document.getElementById('predictBtn').disabled = true;
+    document.getElementById('predictBtn').innerHTML = '<div class="loading-spinner mx-auto"></div><span class="ml-2">Predicting...</span>';
+
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        // Show error with style
+        showNotification('Error: ' + (data.error || 'Something went wrong'), 'error');
+        return;
+      }
+
+      // Show success result
+      document.getElementById('prediction-text').textContent = '₹' + data.prediction.toLocaleString('en-IN');
+      document.getElementById('prediction-container').classList.remove('hidden');
+      
+      // Scroll to result
+      document.getElementById('prediction-container').scrollIntoView({ behavior: 'smooth' });
+      
+      // Show success notification
+      showNotification('Price prediction successful!', 'success');
+      
+    } catch (err) {
+      showNotification('Network error: ' + err.message, 'error');
+    } finally {
+      // Hide loading state
+      document.getElementById('loading-state').classList.add('hidden');
+      document.getElementById('predictBtn').disabled = false;
+      document.getElementById('predictBtn').innerHTML = '<span>Predict Price</span><i class="fas fa-calculator"></i>';
+    }
+  });
+
+  // Notification system
+  function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+      type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    } text-white`;
+    notification.innerHTML = `
+      <div class="flex items-center space-x-2">
+        <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+        <span>${message}</span>
+      </div>
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.remove();
+    }, 5000);
+  }
+
+  // Input validation
+  document.getElementById('kilo_driven').addEventListener('input', function(e) {
+    if (e.target.value < 0) e.target.value = 0;
+    if (e.target.value > 9999999) e.target.value = 9999999;
+  });
+
+  // Add floating animation to cars
+  const floatingCars = document.querySelectorAll('.floating-car');
+  floatingCars.forEach((car, index) => {
+    car.style.animationDelay = `${index * 0.5}s`;
+  });
+  </script>
+
+  <!-- jQuery / Bootstrap not required for form, but kept if you use elsewhere -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" crossorigin="anonymous"></script>
+</body>
+</html>
